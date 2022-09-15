@@ -1,17 +1,23 @@
 from MDP import *
 import pickle,random
 
-#Load agent
-qTable = pickle.load(open("qTable1000.pickle", "rb"))
+#Hyperparameters
+trainedQTableFile = open("qTable1000.pickle", "rb")
+maxAttempts = 100 #max number of attempts allowed to find a balanced agent
+maxRolloutLength = 500 #Make number of changes to attempt to make to find a balanced monster
+doneThreshold = 0.8 #How good (according to the reward function) does a monster need to be
 
+#Load the agent we're choosing to use
+qTable = pickle.load(trainedQTableFile)
+
+#Set of actions
 actions = ["raiseHealth", "lowerHealth", "raiseArmor", "lowerArmor", "raiseSpeed", "lowerSpeed", "raiseDamage", "lowerDamage"]
+
+#Whether or not we're done
 done = False
-doneThreshold = 0.8
-
 rolloutIndex = 0
-maxRolloutLength = 500
 
-maxAttempts = 100
+#Tracking the best monster we've found so far
 bestMonster = None
 bestReward = -1
 
@@ -22,7 +28,7 @@ for attempt in range(0, maxAttempts):
 	while not done and rolloutIndex<maxRolloutLength:
 		rolloutIndex+=1
 
-		#Action Selection
+		#Action selection using pure exploitation
 		action = random.choice(actions)
 		maxValue = -1000
 		maxAction = action
@@ -62,10 +68,15 @@ for attempt in range(0, maxAttempts):
 		currState = nextState
 
 	reward = CalculateReward(currState)
+	
 	if reward>bestReward:
 		bestMonster = currState
 		bestReward = reward
 
+#Close the file
+trainedQTableFile.close()
+
+#Print the final monster and reward value
 print ("Final Reward Value: "+str(bestReward))
 print ("Final Monster: "+str(bestMonster))
 

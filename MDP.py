@@ -1,6 +1,7 @@
 import random
 
-numGamesPerMonster = 1000 #Using one thousand instead of one million
+#Hyperparameters
+numGamesPerMonster = 1000 #Using one thousand instead of one million discussed in Chapter 10
 
 #Every state is a monster. Typically we would have a separate environment representation, but here the state encompasses all the info in the environment
 class State: 
@@ -76,8 +77,6 @@ def RunGame(monster):
 	monster1 = monster
 	monster2 = balancedMonster
 
-	#print ("Monster 1 "+str(monster1)+" vs Monster 2"+str(monster2))
-
 	#Boolean for who goes first
 	balancedFirst = balancedMonster.speed > monster.speed
 
@@ -91,19 +90,14 @@ def RunGame(monster):
 	#Have them fight until one of them dies
 	while monster1.health>0 and monster2.health>0 and attempts<100:
 		attempts+=1
+
 		#Check if monster1 hits
-		#print ("Monster 2 chance "+str((float(monster2.speed)/100.0))+" vs "+str(random.uniform(0,1)))
 		if (float(monster2.speed)/100.0)>random.uniform(0,1):
 			monster2.health-= max(0, monster1.damage-monster2.armor)
-			#print ("Decreasing Monster 2!!!!!")
 
-		#print ("Monster 1 chance "+str((float(monster1.speed)/100.0))+" vs "+str(random.uniform(0,1)))
 		#Check if monster2 is alive and hits
 		if monster2.health>0 and (float(monster1.speed)/100.0)>random.uniform(0,1):
 			monster1.health-= max(0, monster2.damage-monster1.armor)
-			#print ("Decreasing Monster 1!!!!!")
-
-	#print ("Monster 1: "+str(monster1.health)+". Monster 2: "+str(monster2.health)+". Attempts: "+str(attempts))
 
 	#Return +1 for a win, -1 for a loss, and 0 for a tie
 	result = 0
@@ -121,7 +115,7 @@ def RunGame(monster):
 
 	return result
 
-#Calculate reward for reaching this specific monster
+#Calculate reward for reaching this specific monster as winrate over 'numGamesPerMonster' games
 def CalculateReward(monster):
 	wins = 0
 	losses = 0
@@ -134,8 +128,6 @@ def CalculateReward(monster):
 			losses+=1.0
 		else:
 			ties+=1.0
-	#print ("Wins: "+str(wins)+". Losses: "+str(losses)+". Ties: "+str(ties))
 
 	winRate = float(wins)/float(numGamesPerMonster)
-
 	return (0.5-abs(winRate-0.5))/0.5
